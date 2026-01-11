@@ -1,12 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
-import {
-  FlatList,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Text, TextInput, TouchableOpacity, View } from "react-native";
+import DraggableFlatList from "react-native-draggable-flatlist";
 import styles from "./styles";
 
 type Todo = {
@@ -127,14 +122,20 @@ export default function Index() {
       </View>
 
       {/* List */}
-      <FlatList
+      <DraggableFlatList
         data={filteredTodos}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View style={styles.todoItem}>
+        onDragEnd={({ data }) => setTodos(data)}
+        renderItem={({ item, drag, isActive }) => (
+          <TouchableOpacity
+            style={[styles.todoItem, { opacity: isActive ? 0.8 : 1 }]}
+            onLongPress={drag}
+          >
             <TouchableOpacity
               style={[styles.checkbox, item.done && styles.checkboxDone]}
               onPress={() => toggleTodo(item.id)}
+              onLongPress={drag}
+              delayLongPress={200}
             />
 
             <Text style={[styles.todoText, item.done && styles.todoDone]}>
@@ -144,7 +145,7 @@ export default function Index() {
             <TouchableOpacity onPress={() => deleteTodo(item.id)}>
               <Text style={styles.delete}>❌</Text>
             </TouchableOpacity>
-          </View>
+          </TouchableOpacity>
         )}
       />
     </View>
