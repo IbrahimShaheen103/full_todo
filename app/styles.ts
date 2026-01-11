@@ -17,7 +17,7 @@ const styles = StyleSheet.create({
 
   inputRow: {
     flexDirection: "row",
-    marginBottom: 20,
+    marginBottom: 15,
   },
 
   input: {
@@ -43,6 +43,33 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
 
+  filterRow: {
+    flexDirection: "row",
+    marginBottom: 15,
+  },
+
+  filterBtn: {
+    flex: 1,
+    padding: 10,
+    backgroundColor: "#ddd",
+    marginHorizontal: 5,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+
+  filterBtnActive: {
+    backgroundColor: "#4CAF50",
+  },
+
+  filterText: {
+    color: "#000",
+    fontWeight: "bold",
+  },
+
+  filterTextActive: {
+    color: "#fff",
+  },
+
   todoItem: {
     flexDirection: "row",
     backgroundColor: "#fff",
@@ -63,8 +90,6 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: "#4CAF50",
     marginRight: 12,
-    justifyContent: "center",
-    alignItems: "center",
   },
 
   checkboxDone: {
@@ -86,6 +111,14 @@ const styles = StyleSheet.create({
     fontSize: 18,
     marginLeft: 10,
   },
+  searchInput: {
+    backgroundColor: "#fff",
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 8,
+    fontSize: 16,
+    marginBottom: 15, 
+  
+  }
 });
-
 export default styles;

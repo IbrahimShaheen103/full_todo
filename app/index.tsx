@@ -1,4 +1,5 @@
-import { useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useEffect, useState } from "react";
 import {
   FlatList,
   Text,
@@ -14,9 +15,34 @@ type Todo = {
   done: boolean;
 };
 
+const STORAGE_KEY = "MY_TODOS";
+
 export default function Index() {
   const [text, setText] = useState("");
   const [todos, setTodos] = useState<Todo[]>([]);
+  const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState<"all" | "done" | "active">("all");
+
+  // Load todos on start
+  useEffect(() => {
+    loadTodos();
+  }, []);
+
+  // Save todos when changed
+  useEffect(() => {
+    AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(todos));
+  }, [todos]);
+
+  const loadTodos = async () => {
+    try {
+      const json = await AsyncStorage.getItem(STORAGE_KEY);
+      if (json) {
+        setTodos(JSON.parse(json));
+      }
+    } catch (e) {
+      console.error("Failed to load todos.", e);
+    }
+  };
 
   const addTodo = () => {
     if (text.trim() === "") return;
@@ -45,11 +71,21 @@ export default function Index() {
     setTodos((prev) => prev.filter((todo) => todo.id !== id));
   };
 
+  // Apply search & filter
+  const filteredTodos = todos.filter((todo) => {
+    const matchSearch = todo.title.toLowerCase().includes(search.toLowerCase());
+
+    if (filter === "done") return todo.done && matchSearch;
+    if (filter === "active") return !todo.done && matchSearch;
+
+    return matchSearch;
+  });
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>My Todo App 📝</Text>
 
-      {/* Input */}
+      {/* Add Todo */}
       <View style={styles.inputRow}>
         <TextInput
           value={text}
@@ -62,9 +98,37 @@ export default function Index() {
         </TouchableOpacity>
       </View>
 
+      {/* Search */}
+      <TextInput
+        value={search}
+        onChangeText={setSearch}
+        placeholder="Search..."
+        style={styles.searchInput}
+      />
+
+      {/* Filters */}
+      <View style={styles.filterRow}>
+        {["all", "done", "active"].map((f) => (
+          <TouchableOpacity
+            key={f}
+            onPress={() => setFilter(f as any)}
+            style={[styles.filterBtn, filter === f && styles.filterBtnActive]}
+          >
+            <Text
+              style={[
+                styles.filterText,
+                filter === f && styles.filterTextActive,
+              ]}
+            >
+              {f.toUpperCase()}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+
       {/* List */}
       <FlatList
-        data={todos}
+        data={filteredTodos}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <View style={styles.todoItem}>
