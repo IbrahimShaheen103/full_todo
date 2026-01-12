@@ -143,7 +143,15 @@ export default function Index() {
             </TouchableOpacity>
           )}
         />
-
+        {/* floating Delete all list item button */}
+        {todos.length > 0 && (
+          <TouchableOpacity
+            style={styles.deleteAllBtn}
+            onPress={() => setTodos([])}
+          >
+            <Text style={styles.deleteAllText}>x</Text>
+          </TouchableOpacity>
+        )}
         {/* Floating Add Button */}
         <TouchableOpacity onPress={() => setShowForm(true)} style={styles.fab}>
           <Text style={styles.fabText}>+</Text>

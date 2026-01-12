@@ -108,4 +108,21 @@ export default StyleSheet.create({
     color: "#fff",
     fontSize: 32,
   },
+  deleteAllBtn: {
+    position: "absolute",
+    bottom: 30,
+    left:20,
+    width:60,
+    height:60,
+     borderRadius: 30,
+    backgroundColor: "#f01010",
+    alignItems: "center",
+    justifyContent: "center",
+    elevation: 5,
+  },
+  deleteAllText:{
+    color:"#fff",
+    fontSize:30,
+  paddingBottom:4  
+  }
 });
