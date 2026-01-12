@@ -1,8 +1,11 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   FlatList,
+  Image,
   KeyboardAvoidingView,
   Platform,
   Text,
@@ -17,6 +20,8 @@ type Todo = {
   title: string;
   details: string;
   done: boolean;
+  dueDate: string | null;
+  images: string[];
 };
 
 const STORAGE_KEY = "MY_TODOS";
@@ -27,6 +32,9 @@ export default function Index() {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"all" | "done" | "active">("all");
+  const [dueDate, setDueDate] = useState<Date | null>(null);
+  const [images, setImages] = useState<string[]>([]);
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   const router = useRouter();
 
@@ -43,6 +51,20 @@ export default function Index() {
     if (json) setTodos(JSON.parse(json));
   };
 
+  const pickImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 0.7,
+      allowsMultipleSelection: true,
+    });
+
+    if (!result.canceled) {
+      const selected = result.assets.map((asset) => asset.uri);
+      setImages((prev) => [...prev, ...selected]);
+      //
+    }
+  };
+
   const addTodo = () => {
     if (!text.trim()) return;
 
@@ -53,11 +75,15 @@ export default function Index() {
         title: text,
         details,
         done: false,
+        dueDate: dueDate ? dueDate.toISOString() : null,
+        images,
       },
     ]);
 
     setText("");
     setDetails("");
+    setDueDate(null);
+    setImages([]);
   };
 
   const toggleTodo = (id: string) => {
@@ -101,10 +127,75 @@ export default function Index() {
           multiline
         />
 
+        <TouchableOpacity
+          style={styles.dateBtn}
+          onPress={() => setShowDatePicker(true)}
+        >
+          <Text>
+            {dueDate ? `Due: ${dueDate.toDateString()}` : "Pick due date"}
+          </Text>
+        </TouchableOpacity>
+
+        {showDatePicker && (
+          <DateTimePicker
+            value={dueDate || new Date()}
+            mode="date"
+            onChange={(e, date) => {
+              setShowDatePicker(false);
+              if (date) setDueDate(date);
+            }}
+          />
+        )}
+
+        <TouchableOpacity style={styles.imageBtn} onPress={pickImage}>
+          <Text>📎 Add Image ({images.length})</Text>
+        </TouchableOpacity>
+
         <TouchableOpacity style={styles.addBtn} onPress={addTodo}>
           <Text style={styles.addText}>Add</Text>
         </TouchableOpacity>
-
+        {images.length > 0 && (
+          <FlatList
+            data={images}
+            horizontal
+            keyExtractor={(uri) => uri}
+            style={{ marginVertical: 10, height: 900 }}
+            renderItem={({ item }) => (
+              <View
+                style={{
+                  marginRight: 10,
+                  display: "flex",
+                  alignItems: "center",
+                  shadowColor: "#000",
+                  shadowOpacity: 0.1,
+                  shadowRadius: 4,
+                  elevation: 2,
+                }}
+              >
+                <Image
+                  source={{ uri: item }}
+                  style={{ width: 100, height: 100, borderRadius: 10 }}
+                />
+                <TouchableOpacity
+                  onPress={() =>
+                    setImages((prev) => prev.filter((img) => img !== item))
+                  }
+                  style={{
+                    backgroundColor: "red",
+                    borderRadius: 10,
+                    width: 60,
+                    height: 20,
+                    marginTop: 5,
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Text style={{ color: "#fff", fontSize: 12 }}>Remove</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          />
+        )}
         <TextInput
           value={search}
           onChangeText={setSearch}
@@ -145,6 +236,8 @@ export default function Index() {
                     title: item.title,
                     details: item.details,
                     done: item.done.toString(),
+                    dueDate: item.dueDate || "",
+                    images: JSON.stringify(item.images),
                   },
                 })
               }
@@ -158,6 +251,12 @@ export default function Index() {
                 <Text style={[styles.todoText, item.done && styles.todoDone]}>
                   {item.title}
                 </Text>
+
+                {item.dueDate && (
+                  <Text style={styles.dueDate}>
+                    📅 {new Date(item.dueDate).toDateString()}
+                  </Text>
+                )}
 
                 <Text numberOfLines={2} style={styles.todoDetails}>
                   {item.details}

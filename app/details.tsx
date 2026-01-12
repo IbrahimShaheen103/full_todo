@@ -1,8 +1,10 @@
 import { useLocalSearchParams } from "expo-router";
-import { StyleSheet, Text, View } from "react-native";
+import { Key } from "react";
+import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
 
 export default function Details() {
-  const { title, details, done } = useLocalSearchParams();
+  const { title, details, done, dueDate, images } = useLocalSearchParams();
+  const imgs = images ? JSON.parse(images as string) : [];
 
   return (
     <View style={styles.container}>
@@ -11,8 +13,18 @@ export default function Details() {
       <Text style={styles.status}>
         {done === "true" ? "✅ Completed" : "⏳ Not Done"}
       </Text>
+      {dueDate && <Text>📅 {new Date(dueDate as string).toDateString()}</Text>}
 
       <Text style={styles.details}>{details}</Text>
+      <ScrollView horizontal>
+        {imgs.map((uri: any, i: Key | null | undefined) => (
+          <Image
+            key={i}
+            source={{ uri }}
+            style={{ width: 120, height: 120, marginRight: 10 }}
+          />
+        ))}
+      </ScrollView>
     </View>
   );
 }

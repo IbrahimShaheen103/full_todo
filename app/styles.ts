@@ -104,5 +104,30 @@ const styles = StyleSheet.create({
     fontSize: 18,
     marginLeft: 10,
   },
+  dateBtn: {
+  backgroundColor: "#fff",
+  padding: 12,
+  borderRadius: 10,
+  marginBottom: 10,
+  borderWidth: 1,
+  borderColor: "#ddd",
+},
+
+imageBtn: {
+  backgroundColor: "#fff",
+  padding: 12,
+  borderRadius: 10,
+  marginBottom: 10,
+  borderWidth: 1,
+  borderColor: "#ddd",
+  alignItems: "center",
+},
+
+dueDate: {
+  fontSize: 12,
+  color: "#4CAF50",
+  marginTop: 4,
+},
+
 });
 export default styles;
