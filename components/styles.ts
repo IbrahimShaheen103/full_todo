@@ -51,6 +51,8 @@ export default StyleSheet.create({
   imageWrapper: {
     marginRight: 10,
     position: "relative",
+    display:"flex",
+    alignItems:"center"
   },
 
   image: {
@@ -60,20 +62,21 @@ export default StyleSheet.create({
   },
 
   removeBtn: {
-    position: "absolute",
-    top: -6,
-    right: -6,
-    backgroundColor: "red",
-    width: 22,
+    backgroundColor: "transparent",
+    borderStyle: "solid",
+    borderColor: "#ff0000",
+    borderWidth: 1,
     height: 22,
     borderRadius: 11,
     alignItems: "center",
     justifyContent: "center",
+    marginTop: 4,
+    paddingHorizontal: 6,
   },
 
   removeText: {
-    color: "#fff",
-    fontSize: 14,
+    color: "#ff0000",
+    fontSize: 12,
     lineHeight: 14,
   },
 
@@ -97,4 +100,19 @@ export default StyleSheet.create({
   saveBtn: {
     backgroundColor: "#4CAF50",
   },
+  previewOverlay:{
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.9)",
+    justifyContent: "center",
+  },
+  previewPage: {
+    width: '100%',
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  previewImage:{
+    width: '100%',
+    height: '70%',
+    resizeMode: 'contain',
+  }
 });

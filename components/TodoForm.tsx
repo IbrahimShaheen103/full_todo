@@ -2,6 +2,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import * as ImagePicker from "expo-image-picker";
 import { useState } from "react";
 import {
+  Dimensions,
   FlatList,
   Image,
   Modal,
@@ -11,6 +12,8 @@ import {
   View,
 } from "react-native";
 import styles from "./styles";
+
+const { width } = Dimensions.get("window");
 
 type Props = {
   visible: boolean;
@@ -29,6 +32,7 @@ export default function TodoForm({ visible, onClose, onSubmit }: Props) {
   const [images, setImages] = useState<string[]>([]);
   const [dueDate, setDueDate] = useState<Date | null>(null);
   const [showPicker, setShowPicker] = useState(false);
+  const [previewIndex, setPreviewIndex] = useState<number | null>(null);
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -51,6 +55,7 @@ export default function TodoForm({ visible, onClose, onSubmit }: Props) {
     setDetails("");
     setImages([]);
     setDueDate(null);
+    setPreviewIndex(null);
     onClose();
   };
 
@@ -104,17 +109,19 @@ export default function TodoForm({ visible, onClose, onSubmit }: Props) {
               data={images}
               horizontal
               keyExtractor={(i) => i}
-              style={{ marginBottom: 10 }}
-              renderItem={({ item }) => (
+              renderItem={({ item, index }) => (
                 <View style={styles.imageWrapper}>
-                  <Image source={{ uri: item }} style={styles.image} />
+                  <TouchableOpacity onPress={() => setPreviewIndex(index)}>
+                    <Image source={{ uri: item }} style={styles.image} />
+                  </TouchableOpacity>
+
                   <TouchableOpacity
+                    style={styles.removeBtn}
                     onPress={() =>
                       setImages((prev) => prev.filter((img) => img !== item))
                     }
-                    style={styles.removeBtn}
                   >
-                    <Text style={styles.removeText}>×</Text>
+                    <Text style={styles.removeText}>Remove</Text>
                   </TouchableOpacity>
                 </View>
               )}
@@ -137,6 +144,38 @@ export default function TodoForm({ visible, onClose, onSubmit }: Props) {
             </TouchableOpacity>
           </View>
         </View>
+
+        {previewIndex !== null && (
+          <Modal visible transparent animationType="fade">
+            <View style={styles.previewOverlay}>
+              <FlatList
+                data={images}
+                horizontal
+                pagingEnabled
+                keyExtractor={(item) => item}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    style={{
+                      width: Dimensions.get("window").width,
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                    onPress={() => setPreviewIndex(null)}
+                  >
+                    <Image
+                      source={{ uri: item }}
+                      style={{
+                        width: "100%",
+                        height: "70%",
+                        resizeMode: "contain",
+                      }}
+                    />
+                  </TouchableOpacity>
+                )}
+              />
+            </View>
+          </Modal>
+        )}
       </View>
     </Modal>
   );
