@@ -1,6 +1,6 @@
 import { StyleSheet } from "react-native";
 
-const styles = StyleSheet.create({
+export default StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f4f4f4",
@@ -15,30 +15,16 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 
-  input: {
+  searchInput: {
     backgroundColor: "#fff",
-    padding: 14,
+    padding: 12,
     borderRadius: 10,
-    fontSize: 16,
     marginBottom: 10,
-  },
-
-  addBtn: {
-    backgroundColor: "#4CAF50",
-    padding: 14,
-    borderRadius: 10,
-    alignItems: "center",
-  },
-
-  addText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 16,
   },
 
   filterRow: {
     flexDirection: "row",
-    marginVertical: 10,
+    marginBottom: 10,
   },
 
   filterBtn: {
@@ -90,44 +76,36 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
 
-  todoDetails: {
-    fontSize: 13,
-    color: "#666",
-  },
-
   todoDone: {
     textDecorationLine: "line-through",
     color: "gray",
+  },
+
+  dueDate: {
+    fontSize: 12,
+    color: "#4CAF50",
   },
 
   delete: {
     fontSize: 18,
     marginLeft: 10,
   },
-  dateBtn: {
-  backgroundColor: "#fff",
-  padding: 12,
-  borderRadius: 10,
-  marginBottom: 10,
-  borderWidth: 1,
-  borderColor: "#ddd",
-},
 
-imageBtn: {
-  backgroundColor: "#fff",
-  padding: 12,
-  borderRadius: 10,
-  marginBottom: 10,
-  borderWidth: 1,
-  borderColor: "#ddd",
-  alignItems: "center",
-},
+  fab: {
+    position: "absolute",
+    bottom: 30,
+    right: 20,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: "#4CAF50",
+    alignItems: "center",
+    justifyContent: "center",
+    elevation: 5,
+  },
 
-dueDate: {
-  fontSize: 12,
-  color: "#4CAF50",
-  marginTop: 4,
-},
-
+  fabText: {
+    color: "#fff",
+    fontSize: 32,
+  },
 });
-export default styles;
