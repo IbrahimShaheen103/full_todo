@@ -13,8 +13,6 @@ import {
 } from "react-native";
 import styles from "./styles";
 
-const { width } = Dimensions.get("window");
-
 type Props = {
   visible: boolean;
   onClose: () => void;
@@ -45,7 +43,14 @@ export default function TodoForm({ visible, onClose, onSubmit }: Props) {
       setImages((prev) => [...prev, ...result.assets.map((a) => a.uri)]);
     }
   };
-
+  const handleOnClose = () => {
+    setTitle("");
+    setDetails("");
+    setImages([]);
+    setDueDate(null);
+    setPreviewIndex(null);
+    onClose();
+  };
   const submit = () => {
     if (!title.trim()) return;
 
@@ -131,7 +136,7 @@ export default function TodoForm({ visible, onClose, onSubmit }: Props) {
           <View style={styles.actions}>
             <TouchableOpacity
               style={[styles.actionBtn, styles.cancelBtn]}
-              onPress={onClose}
+              onPress={handleOnClose}
             >
               <Text>Cancel</Text>
             </TouchableOpacity>
