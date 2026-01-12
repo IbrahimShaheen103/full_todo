@@ -1,12 +1,21 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { Text, TextInput, TouchableOpacity, View } from "react-native";
-import DraggableFlatList from "react-native-draggable-flatlist";
+import {
+  FlatList,
+  KeyboardAvoidingView,
+  Platform,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import styles from "./styles";
 
 type Todo = {
   id: string;
   title: string;
+  details: string;
   done: boolean;
 };
 
@@ -14,140 +23,154 @@ const STORAGE_KEY = "MY_TODOS";
 
 export default function Index() {
   const [text, setText] = useState("");
+  const [details, setDetails] = useState("");
   const [todos, setTodos] = useState<Todo[]>([]);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"all" | "done" | "active">("all");
 
-  // Load todos on start
+  const router = useRouter();
+
   useEffect(() => {
     loadTodos();
   }, []);
 
-  // Save todos when changed
   useEffect(() => {
     AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(todos));
   }, [todos]);
 
   const loadTodos = async () => {
-    try {
-      const json = await AsyncStorage.getItem(STORAGE_KEY);
-      if (json) {
-        setTodos(JSON.parse(json));
-      }
-    } catch (e) {
-      console.error("Failed to load todos.", e);
-    }
+    const json = await AsyncStorage.getItem(STORAGE_KEY);
+    if (json) setTodos(JSON.parse(json));
   };
 
   const addTodo = () => {
-    if (text.trim() === "") return;
+    if (!text.trim()) return;
 
     setTodos((prev) => [
       ...prev,
       {
         id: Date.now().toString(),
         title: text,
+        details,
         done: false,
       },
     ]);
 
     setText("");
+    setDetails("");
   };
 
   const toggleTodo = (id: string) => {
     setTodos((prev) =>
-      prev.map((todo) =>
-        todo.id === id ? { ...todo, done: !todo.done } : todo
-      )
+      prev.map((t) => (t.id === id ? { ...t, done: !t.done } : t))
     );
   };
 
   const deleteTodo = (id: string) => {
-    setTodos((prev) => prev.filter((todo) => todo.id !== id));
+    setTodos((prev) => prev.filter((t) => t.id !== id));
   };
 
-  // Apply search & filter
   const filteredTodos = todos.filter((todo) => {
-    const matchSearch = todo.title.toLowerCase().includes(search.toLowerCase());
+    const match = todo.title.toLowerCase().includes(search.toLowerCase());
 
-    if (filter === "done") return todo.done && matchSearch;
-    if (filter === "active") return !todo.done && matchSearch;
-
-    return matchSearch;
+    if (filter === "done") return todo.done && match;
+    if (filter === "active") return !todo.done && match;
+    return match;
   });
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>My Todo App 📝</Text>
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+    >
+      <View style={styles.container}>
+        <Text style={styles.title}>My Todo App 📝</Text>
 
-      {/* Add Todo */}
-      <View style={styles.inputRow}>
         <TextInput
           value={text}
           onChangeText={setText}
-          placeholder="Enter a task..."
+          placeholder="Todo title..."
           style={styles.input}
         />
+
+        <TextInput
+          value={details}
+          onChangeText={setDetails}
+          placeholder="Details..."
+          style={[styles.input, { height: 80 }]}
+          multiline
+        />
+
         <TouchableOpacity style={styles.addBtn} onPress={addTodo}>
-          <Text style={styles.addText}>+</Text>
+          <Text style={styles.addText}>Add</Text>
         </TouchableOpacity>
-      </View>
 
-      {/* Search */}
-      <TextInput
-        value={search}
-        onChangeText={setSearch}
-        placeholder="Search..."
-        style={styles.searchInput}
-      />
+        <TextInput
+          value={search}
+          onChangeText={setSearch}
+          placeholder="Search..."
+          style={styles.input}
+        />
 
-      {/* Filters */}
-      <View style={styles.filterRow}>
-        {["all", "done", "active"].map((f) => (
-          <TouchableOpacity
-            key={f}
-            onPress={() => setFilter(f as any)}
-            style={[styles.filterBtn, filter === f && styles.filterBtnActive]}
-          >
-            <Text
-              style={[
-                styles.filterText,
-                filter === f && styles.filterTextActive,
-              ]}
-            >
-              {f.toUpperCase()}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-
-      {/* List */}
-      <DraggableFlatList
-        data={filteredTodos}
-        keyExtractor={(item) => item.id}
-        onDragEnd={({ data }) => setTodos(data)}
-        renderItem={({ item, drag, isActive }) => (
-          <TouchableOpacity
-            style={[styles.todoItem, { opacity: isActive ? 0.8 : 1 }]}
-            onLongPress={drag}
-          >
+        <View style={styles.filterRow}>
+          {["all", "done", "active"].map((f) => (
             <TouchableOpacity
-              style={[styles.checkbox, item.done && styles.checkboxDone]}
-              onPress={() => toggleTodo(item.id)}
-              onLongPress={drag}
-              delayLongPress={200}
-            />
-
-            <Text style={[styles.todoText, item.done && styles.todoDone]}>
-              {item.title}
-            </Text>
-
-            <TouchableOpacity onPress={() => deleteTodo(item.id)}>
-              <Text style={styles.delete}>❌</Text>
+              key={f}
+              onPress={() => setFilter(f as any)}
+              style={[styles.filterBtn, filter === f && styles.filterBtnActive]}
+            >
+              <Text
+                style={[
+                  styles.filterText,
+                  filter === f && styles.filterTextActive,
+                ]}
+              >
+                {f.toUpperCase()}
+              </Text>
             </TouchableOpacity>
-          </TouchableOpacity>
-        )}
-      />
-    </View>
+          ))}
+        </View>
+
+        <FlatList
+          data={filteredTodos}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={{ paddingBottom: 40 }}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              style={styles.todoItem}
+              onPress={() =>
+                router.push({
+                  pathname: "/details",
+                  params: {
+                    title: item.title,
+                    details: item.details,
+                    done: item.done.toString(),
+                  },
+                })
+              }
+            >
+              <TouchableOpacity
+                style={[styles.checkbox, item.done && styles.checkboxDone]}
+                onPress={() => toggleTodo(item.id)}
+              />
+
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.todoText, item.done && styles.todoDone]}>
+                  {item.title}
+                </Text>
+
+                <Text numberOfLines={2} style={styles.todoDetails}>
+                  {item.details}
+                </Text>
+              </View>
+
+              <TouchableOpacity onPress={() => deleteTodo(item.id)}>
+                <Text style={styles.delete}>❌</Text>
+              </TouchableOpacity>
+            </TouchableOpacity>
+          )}
+        />
+      </View>
+    </KeyboardAvoidingView>
   );
 }

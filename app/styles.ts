@@ -11,41 +11,34 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: "bold",
-    marginBottom: 20,
+    marginBottom: 10,
     textAlign: "center",
   },
 
-  inputRow: {
-    flexDirection: "row",
-    marginBottom: 15,
-  },
-
   input: {
-    flex: 1,
     backgroundColor: "#fff",
     padding: 14,
     borderRadius: 10,
     fontSize: 16,
+    marginBottom: 10,
   },
 
   addBtn: {
     backgroundColor: "#4CAF50",
-    width: 50,
-    marginLeft: 10,
+    padding: 14,
     borderRadius: 10,
     alignItems: "center",
-    justifyContent: "center",
   },
 
   addText: {
     color: "#fff",
-    fontSize: 28,
     fontWeight: "bold",
+    fontSize: 16,
   },
 
   filterRow: {
     flexDirection: "row",
-    marginBottom: 15,
+    marginVertical: 10,
   },
 
   filterBtn: {
@@ -62,7 +55,6 @@ const styles = StyleSheet.create({
   },
 
   filterText: {
-    color: "#000",
     fontWeight: "bold",
   },
 
@@ -77,9 +69,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     marginBottom: 10,
     alignItems: "center",
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 5,
     elevation: 2,
   },
 
@@ -97,9 +86,13 @@ const styles = StyleSheet.create({
   },
 
   todoText: {
-    flex: 1,
     fontSize: 16,
-    color: "#333",
+    fontWeight: "bold",
+  },
+
+  todoDetails: {
+    fontSize: 13,
+    color: "#666",
   },
 
   todoDone: {
@@ -111,14 +104,5 @@ const styles = StyleSheet.create({
     fontSize: 18,
     marginLeft: 10,
   },
-  searchInput: {
-    backgroundColor: "#fff",
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    borderRadius: 8,
-    fontSize: 16,
-    marginBottom: 15, 
-  
-  }
 });
 export default styles;
