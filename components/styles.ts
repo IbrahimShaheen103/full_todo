@@ -115,4 +115,57 @@ export default StyleSheet.create({
     height: "70%",
     resizeMode: "contain",
   },
+  saveBtnDisabled: {
+    backgroundColor: "#bdbdbd",
+  },
+  saveTextDisabled: {
+    color: "#f3f0f0",
+  },
+  alertContainer: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  alertBox: {
+    width: 300,
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    padding: 24,
+    alignItems: "center",
+    elevation: 10,
+  },
+  alertText: {
+    fontSize: 16,
+    marginBottom: 20,
+    textAlign: "center",
+  },
+  alertButtons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+  },
+  alertButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: "center",
+    marginHorizontal: 6,
+    backgroundColor: "#f5f5f5",
+  },
+
+  alertButtonText: {
+    fontSize: 16,
+    color: "#1e241e",
+    fontWeight: "bold",
+  },
+  alertButtonTextNo: {
+    fontSize: 16,
+    color: "#e53935",
+    fontWeight: "bold",
+  },
 });
