@@ -35,6 +35,9 @@ export default function Index() {
   const router = useRouter();
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.08)).current;
+  const snackbarAnim = useRef(new Animated.Value(0)).current;
+  const [lastDeletedTodos, setLastDeletedTodos] = useState<Todo[] | null>(null);
+  const [showUndo, setShowUndo] = useState(false);
   useEffect(() => {
     loadTodos();
   }, []);
@@ -196,11 +199,28 @@ export default function Index() {
                 <TouchableOpacity
                   style={styles.alertButton}
                   onPress={() => {
+                    setLastDeletedTodos(todos);
+                    setShowUndo(true);
+                    Animated.timing(snackbarAnim, {
+                      toValue: 1,
+                      duration: 250,
+                      useNativeDriver: true,
+                    }).start();
                     setTodos([]);
                     closeAlert();
                     Haptics.notificationAsync(
                       Haptics.NotificationFeedbackType.Error
                     );
+                    setTimeout(() => {
+                      Animated.timing(snackbarAnim, {
+                        toValue: 0,
+                        duration: 250,
+                        useNativeDriver: true,
+                      }).start(() => {
+                        setShowUndo(false);
+                        setLastDeletedTodos(null);
+                      });
+                    }, 5000);
                   }}
                 >
                   <Text style={styles.alertButtonText}>Yes</Text>
@@ -216,6 +236,38 @@ export default function Index() {
                 </TouchableOpacity>
               </View>
             </Animated.View>
+          </Animated.View>
+        )}
+        {/* Undo Snackbar */}
+        {showUndo && lastDeletedTodos && (
+          <Animated.View
+            style={[
+              styles.undo,
+              {
+                opacity: snackbarAnim,
+                transform: [
+                  {
+                    translateY: snackbarAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [60, 0],
+                    }),
+                  },
+                ],
+              },
+            ]}
+          >
+            <Text style={{ color: "#fff" }}> All todos deleted</Text>
+            <TouchableOpacity
+              onPress={() => {
+                if (lastDeletedTodos) {
+                  setTodos(lastDeletedTodos);
+                  setLastDeletedTodos(null);
+                  setShowUndo(false);
+                }
+              }}
+            >
+              <Text style={{ color: "#4CAF50", fontWeight: "bold" }}>UNDO</Text>
+            </TouchableOpacity>
           </Animated.View>
         )}
         {/* Floating Add Button */}

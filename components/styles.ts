@@ -51,8 +51,8 @@ export default StyleSheet.create({
   imageWrapper: {
     marginRight: 10,
     position: "relative",
-    display:"flex",
-    alignItems:"center"
+    display: "flex",
+    alignItems: "center",
   },
 
   image: {
@@ -100,19 +100,19 @@ export default StyleSheet.create({
   saveBtn: {
     backgroundColor: "#4CAF50",
   },
-  previewOverlay:{
+  previewOverlay: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.9)",
     justifyContent: "center",
   },
   previewPage: {
-    width: '100%',
+    width: "100%",
     justifyContent: "center",
     alignItems: "center",
   },
-  previewImage:{
-    width: '100%',
-    height: '70%',
-    resizeMode: 'contain',
-  }
+  previewImage: {
+    width: "100%",
+    height: "70%",
+    resizeMode: "contain",
+  },
 });

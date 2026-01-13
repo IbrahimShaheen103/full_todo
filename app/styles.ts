@@ -169,4 +169,17 @@ export default StyleSheet.create({
     color: "#1e241e",
     fontWeight: "bold",
   },
+  undo: {
+    position: "absolute",
+    bottom: 100,
+    left: 20,
+    right: 20,
+    backgroundColor: "#333",
+    padding: 15,
+    borderRadius: 12,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    elevation: 100,
+  },
 });
