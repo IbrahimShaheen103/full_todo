@@ -55,10 +55,12 @@ export default function Index() {
     setTodos((prev) =>
       prev.map((t) => (t.id === id ? { ...t, done: !t.done } : t))
     );
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Soft);
   };
 
   const deleteTodo = (id: string) => {
     setTodos((prev) => prev.filter((t) => t.id !== id));
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
   };
 
   const filteredTodos = todos.filter((todo) => {
@@ -104,7 +106,10 @@ export default function Index() {
           {["all", "done", "active"].map((f) => (
             <TouchableOpacity
               key={f}
-              onPress={() => setFilter(f as any)}
+              onPress={() => {
+                setFilter(f as any);
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              }}
               style={[styles.filterBtn, filter === f && styles.filterBtnActive]}
             >
               <Text
