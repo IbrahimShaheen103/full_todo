@@ -32,12 +32,16 @@ export default function Index() {
   const [filter, setFilter] = useState<"all" | "done" | "active">("all");
   const [showForm, setShowForm] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
-  const router = useRouter();
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const scaleAnim = useRef(new Animated.Value(0.08)).current;
-  const snackbarAnim = useRef(new Animated.Value(0)).current;
+
   const [lastDeletedTodos, setLastDeletedTodos] = useState<Todo[] | null>(null);
   const [showUndo, setShowUndo] = useState(false);
+
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const scaleAnim = useRef(new Animated.Value(0.8)).current;
+  const snackbarAnim = useRef(new Animated.Value(0)).current;
+
+  const router = useRouter();
+
   useEffect(() => {
     loadTodos();
   }, []);
@@ -70,6 +74,23 @@ export default function Index() {
     if (filter === "active") return !todo.done && match;
     return match;
   });
+
+  const openAlert = () => {
+    setShowAlert(true);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  };
+
   const closeAlert = () => {
     Animated.parallel([
       Animated.timing(fadeAnim, {
@@ -85,6 +106,41 @@ export default function Index() {
     ]).start(() => setShowAlert(false));
   };
 
+  const confirmDeleteAll = () => {
+    setLastDeletedTodos(todos);
+    setTodos([]);
+    closeAlert();
+
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+
+    setShowUndo(true);
+    Animated.timing(snackbarAnim, {
+      toValue: 1,
+      duration: 250,
+      useNativeDriver: true,
+    }).start();
+
+    setTimeout(() => {
+      Animated.timing(snackbarAnim, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: true,
+      }).start(() => {
+        setShowUndo(false);
+        setLastDeletedTodos(null);
+      });
+    }, 5000);
+  };
+
+  const undoDelete = () => {
+    if (!lastDeletedTodos) return;
+
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setTodos(lastDeletedTodos);
+    setLastDeletedTodos(null);
+    setShowUndo(false);
+  };
+
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
@@ -93,7 +149,6 @@ export default function Index() {
       <View style={styles.container}>
         <Text style={styles.title}>My Todo App 📝</Text>
 
-        {/* 🔍 Search */}
         <TextInput
           value={search}
           onChangeText={setSearch}
@@ -101,7 +156,6 @@ export default function Index() {
           style={styles.searchInput}
         />
 
-        {/* Filters */}
         <View style={styles.filterRow}>
           {["all", "done", "active"].map((f) => (
             <TouchableOpacity
@@ -124,11 +178,10 @@ export default function Index() {
           ))}
         </View>
 
-        {/* Todo List */}
         <FlatList
           data={filteredTodos}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={{ paddingBottom: 100 }}
+          contentContainerStyle={{ paddingBottom: 120 }}
           renderItem={({ item }) => (
             <TouchableOpacity
               style={styles.todoItem}
@@ -168,30 +221,13 @@ export default function Index() {
             </TouchableOpacity>
           )}
         />
-        {/* floating Delete all list item button */}
+
         {todos.length > 0 && (
-          <TouchableOpacity
-            style={styles.deleteAllBtn}
-            onPress={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-              setShowAlert(true);
-              Animated.parallel([
-                Animated.timing(fadeAnim, {
-                  toValue: 1,
-                  duration: 200,
-                  useNativeDriver: true,
-                }),
-                Animated.spring(scaleAnim, {
-                  toValue: 1,
-                  useNativeDriver: true,
-                }),
-              ]).start();
-            }}
-          >
+          <TouchableOpacity style={styles.deleteAllBtn} onPress={openAlert}>
             <Text style={styles.deleteAllText}>🗑</Text>
           </TouchableOpacity>
         )}
-        {/* Alert for delete all todos */}
+
         {showAlert && (
           <Animated.View style={[styles.alertContainer, { opacity: fadeAnim }]}>
             <Animated.View
@@ -203,39 +239,13 @@ export default function Index() {
               <View style={styles.alertButtons}>
                 <TouchableOpacity
                   style={styles.alertButton}
-                  onPress={() => {
-                    setLastDeletedTodos(todos);
-                    setShowUndo(true);
-                    Animated.timing(snackbarAnim, {
-                      toValue: 1,
-                      duration: 250,
-                      useNativeDriver: true,
-                    }).start();
-                    setTodos([]);
-                    closeAlert();
-                    Haptics.notificationAsync(
-                      Haptics.NotificationFeedbackType.Error
-                    );
-                    setTimeout(() => {
-                      Animated.timing(snackbarAnim, {
-                        toValue: 0,
-                        duration: 250,
-                        useNativeDriver: true,
-                      }).start(() => {
-                        setShowUndo(false);
-                        setLastDeletedTodos(null);
-                      });
-                    }, 5000);
-                  }}
+                  onPress={confirmDeleteAll}
                 >
                   <Text style={styles.alertButtonText}>Yes</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.alertButton}
-                  onPress={() => {
-                    closeAlert();
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  }}
+                  onPress={closeAlert}
                 >
                   <Text style={styles.alertButtonTextNo}>No</Text>
                 </TouchableOpacity>
@@ -243,7 +253,7 @@ export default function Index() {
             </Animated.View>
           </Animated.View>
         )}
-        {/* Undo Snackbar */}
+
         {showUndo && lastDeletedTodos && (
           <Animated.View
             style={[
@@ -261,35 +271,28 @@ export default function Index() {
               },
             ]}
           >
-            <Text style={{ color: "#fff" }}> All todos deleted</Text>
-            <TouchableOpacity
-              onPress={() => {
-                if (lastDeletedTodos) {
-                  setTodos(lastDeletedTodos);
-                  setLastDeletedTodos(null);
-                  setShowUndo(false);
-                }
-              }}
-            >
-              <Text style={{ color: "#4CAF50", fontWeight: "bold" }}>UNDO</Text>
+            <Text style={{ color: "#fff" }}>All todos deleted</Text>
+            <TouchableOpacity onPress={undoDelete}>
+              <Text
+                style={{
+                  color: "#4CAF50",
+                  fontWeight: "bold",
+                }}
+              >
+                UNDO
+              </Text>
             </TouchableOpacity>
           </Animated.View>
         )}
-        {/* Floating Add Button */}
+
         <TouchableOpacity onPress={() => setShowForm(true)} style={styles.fab}>
           <Text style={styles.fabText}>+</Text>
         </TouchableOpacity>
 
-        {/* Popup Form */}
         <TodoForm
           visible={showForm}
           onClose={() => setShowForm(false)}
-          onSubmit={(data: {
-            title: string;
-            details: string;
-            images: string[];
-            dueDate: Date | null;
-          }) => {
+          onSubmit={(data) => {
             setTodos((prev) => [
               ...prev,
               {
@@ -297,7 +300,7 @@ export default function Index() {
                 title: data.title,
                 details: data.details,
                 images: data.images,
-                dueDate: data.dueDate ? data.dueDate.toString() : null,
+                dueDate: data.dueDate ? data.dueDate.toISOString() : null,
                 done: false,
               },
             ]);
