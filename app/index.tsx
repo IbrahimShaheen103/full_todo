@@ -29,7 +29,7 @@ export default function Index() {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"all" | "done" | "active">("all");
   const [showForm, setShowForm] = useState(false);
-
+  const [showAlert, setShowAlert] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -147,10 +147,37 @@ export default function Index() {
         {todos.length > 0 && (
           <TouchableOpacity
             style={styles.deleteAllBtn}
-            onPress={() => setTodos([])}
+            onPress={() => setShowAlert(true)}
           >
-            <Text style={styles.deleteAllText}>x</Text>
+            <Text style={styles.deleteAllText}>🗑</Text>
           </TouchableOpacity>
+        )}
+        {/* Alert for delete all todos */}
+        {showAlert && (
+          <View style={styles.alertContainer}>
+            <View style={styles.alertBox}>
+              <Text style={styles.alertText}>
+                Are you sure you want to delete all todos?
+              </Text>
+              <View style={styles.alertButtons}>
+                <TouchableOpacity
+                  style={styles.alertButton}
+                  onPress={() => {
+                    setTodos([]);
+                    setShowAlert(false);
+                  }}
+                >
+                  <Text style={styles.alertButtonText}>Yes</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.alertButton}
+                  onPress={() => setShowAlert(false)}
+                >
+                  <Text style={styles.alertButtonTextNo}>No</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
         )}
         {/* Floating Add Button */}
         <TouchableOpacity onPress={() => setShowForm(true)} style={styles.fab}>

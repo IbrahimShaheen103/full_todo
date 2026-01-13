@@ -111,18 +111,62 @@ export default StyleSheet.create({
   deleteAllBtn: {
     position: "absolute",
     bottom: 30,
-    left:20,
-    width:60,
-    height:60,
-     borderRadius: 30,
-    backgroundColor: "#f01010",
+    left: 20,
+    width: 60,
+    height: 60,
+    backgroundColor: "transparent",
     alignItems: "center",
     justifyContent: "center",
     elevation: 5,
   },
-  deleteAllText:{
-    color:"#fff",
-    fontSize:30,
-  paddingBottom:4  
-  }
+  deleteAllText: {
+    fontSize: 30,
+  },
+  alertContainer: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  alertBox: {
+    width: 300,
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    padding: 24,
+    alignItems: "center",
+    elevation: 10,
+  },
+  alertText: {
+    fontSize: 16,
+    marginBottom: 20,
+    textAlign: "center",
+  },
+  alertButtons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+  },
+  alertButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: "center",
+    marginHorizontal: 6,
+    backgroundColor: "#f5f5f5",
+  },
+
+  alertButtonText: {
+    fontSize: 16,
+    color: "#e53935",
+    fontWeight: "bold",
+  },
+  alertButtonTextNo: {
+    fontSize: 16,
+    color: "#1e241e",
+    fontWeight: "bold",
+  },
 });
