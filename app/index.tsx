@@ -1,8 +1,9 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
+  Animated,
   FlatList,
   KeyboardAvoidingView,
   Platform,
@@ -32,7 +33,8 @@ export default function Index() {
   const [showForm, setShowForm] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
   const router = useRouter();
-
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const scaleAnim = useRef(new Animated.Value(0.08)).current;
   useEffect(() => {
     loadTodos();
   }, []);
@@ -63,6 +65,20 @@ export default function Index() {
     if (filter === "active") return !todo.done && match;
     return match;
   });
+  const closeAlert = () => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 0,
+        duration: 150,
+        useNativeDriver: true,
+      }),
+      Animated.timing(scaleAnim, {
+        toValue: 0.8,
+        duration: 150,
+        useNativeDriver: true,
+      }),
+    ]).start(() => setShowAlert(false));
+  };
 
   return (
     <KeyboardAvoidingView
@@ -151,6 +167,17 @@ export default function Index() {
             onPress={() => {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
               setShowAlert(true);
+              Animated.parallel([
+                Animated.timing(fadeAnim, {
+                  toValue: 1,
+                  duration: 200,
+                  useNativeDriver: true,
+                }),
+                Animated.spring(scaleAnim, {
+                  toValue: 1,
+                  useNativeDriver: true,
+                }),
+              ]).start();
             }}
           >
             <Text style={styles.deleteAllText}>🗑</Text>
@@ -158,8 +185,10 @@ export default function Index() {
         )}
         {/* Alert for delete all todos */}
         {showAlert && (
-          <View style={styles.alertContainer}>
-            <View style={styles.alertBox}>
+          <Animated.View style={[styles.alertContainer, { opacity: fadeAnim }]}>
+            <Animated.View
+              style={[styles.alertBox, { transform: [{ scale: scaleAnim }] }]}
+            >
               <Text style={styles.alertText}>
                 Are you sure you want to delete all todos?
               </Text>
@@ -168,7 +197,7 @@ export default function Index() {
                   style={styles.alertButton}
                   onPress={() => {
                     setTodos([]);
-                    setShowAlert(false);
+                    closeAlert();
                     Haptics.notificationAsync(
                       Haptics.NotificationFeedbackType.Error
                     );
@@ -179,15 +208,15 @@ export default function Index() {
                 <TouchableOpacity
                   style={styles.alertButton}
                   onPress={() => {
-                    setShowAlert(false);
+                    closeAlert();
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   }}
                 >
                   <Text style={styles.alertButtonTextNo}>No</Text>
                 </TouchableOpacity>
               </View>
-            </View>
-          </View>
+            </Animated.View>
+          </Animated.View>
         )}
         {/* Floating Add Button */}
         <TouchableOpacity onPress={() => setShowForm(true)} style={styles.fab}>
