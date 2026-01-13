@@ -1,4 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
@@ -147,7 +148,10 @@ export default function Index() {
         {todos.length > 0 && (
           <TouchableOpacity
             style={styles.deleteAllBtn}
-            onPress={() => setShowAlert(true)}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+              setShowAlert(true);
+            }}
           >
             <Text style={styles.deleteAllText}>🗑</Text>
           </TouchableOpacity>
@@ -165,13 +169,19 @@ export default function Index() {
                   onPress={() => {
                     setTodos([]);
                     setShowAlert(false);
+                    Haptics.notificationAsync(
+                      Haptics.NotificationFeedbackType.Error
+                    );
                   }}
                 >
                   <Text style={styles.alertButtonText}>Yes</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.alertButton}
-                  onPress={() => setShowAlert(false)}
+                  onPress={() => {
+                    setShowAlert(false);
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  }}
                 >
                   <Text style={styles.alertButtonTextNo}>No</Text>
                 </TouchableOpacity>
