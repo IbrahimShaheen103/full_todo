@@ -1,7 +1,7 @@
 import DateTimePicker from "@react-native-community/datetimepicker";
 import * as Haptics from "expo-haptics";
 import * as ImagePicker from "expo-image-picker";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Animated,
   Dimensions,
@@ -13,30 +13,43 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import styles from "../styles";
+import styles from "./../styles";
+
+type Todo = {
+  id: string;
+  title: string;
+  details: string;
+  done: boolean;
+  dueDate: string | null;
+  images: string[];
+};
 
 type Props = {
   visible: boolean;
+  data: Todo;
   onClose: () => void;
-  onSubmit: (data: {
-    title: string;
-    details: string;
-    images: string[];
-    dueDate: Date | null;
-  }) => void;
+  onSubmit: (data: Todo) => void;
 };
 
-export default function TodoForm({ visible, onClose, onSubmit }: Props) {
-  const [title, setTitle] = useState("");
-  const [details, setDetails] = useState("");
-  const [images, setImages] = useState<string[]>([]);
-  const [dueDate, setDueDate] = useState<Date | null>(null);
+export default function EditForm({ visible, onClose, onSubmit, data }: Props) {
+  const [title, setTitle] = useState(data.title);
+  const [details, setDetails] = useState(data.details);
+  const [images, setImages] = useState<string[]>(data.images);
+  const [dueDate, setDueDate] = useState<string | null>(data.dueDate);
   const [showPicker, setShowPicker] = useState(false);
-  const [previewIndex, setPreviewIndex] = useState<number | null>(null);
 
+  const [previewIndex, setPreviewIndex] = useState<number | null>(null);
   const [showAlert, setShowAlert] = useState(false);
+
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
+
+  useEffect(() => {
+    setTitle(data.title);
+    setDetails(data.details);
+    setImages(data.images);
+    setDueDate(data.dueDate);
+  }, [data]);
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -49,11 +62,9 @@ export default function TodoForm({ visible, onClose, onSubmit }: Props) {
       setImages((prev) => [...prev, ...result.assets.map((a) => a.uri)]);
     }
   };
-
   const openDiscardAlert = () => {
     setShowAlert(true);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-
     Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,
@@ -68,13 +79,18 @@ export default function TodoForm({ visible, onClose, onSubmit }: Props) {
   };
 
   const handleCancel = () => {
-    if (title || details || images.length > 0 || dueDate) {
+    if (
+      title !== data.title ||
+      details !== data.details ||
+      dueDate !== data.dueDate ||
+      images.toString() !== data.images.toString()
+    ) {
+      // There are unsaved changes
       openDiscardAlert();
     } else {
       onClose();
     }
   };
-
   const confirmDiscard = () => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
 
@@ -91,45 +107,38 @@ export default function TodoForm({ visible, onClose, onSubmit }: Props) {
       }),
     ]).start(() => {
       setShowAlert(false);
-      setTitle("");
-      setDetails("");
-      setImages([]);
-      setDueDate(null);
-      setPreviewIndex(null);
+      setTitle(data.title);
+      setDetails(data.details);
+      setDueDate(data.dueDate);
+      setImages(data.images);
       onClose();
     });
   };
-
   const submit = () => {
-    if (!title.trim()) return;
-
-    onSubmit({ title, details, images, dueDate });
-
-    setTitle("");
-    setDetails("");
-    setImages([]);
-    setDueDate(null);
-    setPreviewIndex(null);
-    onClose();
+    onSubmit({
+      ...data,
+      title: title.trim(),
+      details,
+      images,
+      dueDate,
+    });
   };
 
   return (
     <Modal visible={visible} animationType="slide" transparent>
       <View style={styles.overlay}>
         <View style={styles.container}>
-          <Text style={styles.header}>New Todo</Text>
+          <Text style={styles.header}>Edit Todo</Text>
 
           <TextInput
             value={title}
             onChangeText={setTitle}
-            placeholder="Title"
             style={styles.input}
           />
 
           <TextInput
             value={details}
             onChangeText={setDetails}
-            placeholder="Details"
             style={[styles.input, styles.textarea]}
             multiline
           />
@@ -139,25 +148,24 @@ export default function TodoForm({ visible, onClose, onSubmit }: Props) {
             onPress={() => setShowPicker(true)}
           >
             <Text>
-              {dueDate ? `Due: ${dueDate.toDateString()}` : "Pick due date"}
+              {dueDate ? new Date(dueDate).toDateString() : "Pick due date"}
             </Text>
           </TouchableOpacity>
 
           {showPicker && (
             <DateTimePicker
-              value={dueDate || new Date()}
+              value={dueDate ? new Date(dueDate) : new Date()}
               mode="date"
               onChange={(e, date) => {
                 setShowPicker(false);
-                if (date) setDueDate(date);
+                if (date) setDueDate(date.toISOString());
               }}
             />
           )}
 
           <TouchableOpacity style={styles.imageBtn} onPress={pickImage}>
-            <Text>📎 Add Images ({images.length})</Text>
+            <Text>📎 Edit Images</Text>
           </TouchableOpacity>
-
           {images.length > 0 && (
             <FlatList
               data={images}
@@ -168,7 +176,6 @@ export default function TodoForm({ visible, onClose, onSubmit }: Props) {
                   <TouchableOpacity onPress={() => setPreviewIndex(index)}>
                     <Image source={{ uri: item }} style={styles.image} />
                   </TouchableOpacity>
-
                   <TouchableOpacity
                     style={styles.removeBtn}
                     onPress={() => {
@@ -182,7 +189,6 @@ export default function TodoForm({ visible, onClose, onSubmit }: Props) {
               )}
             />
           )}
-
           <View style={styles.actions}>
             <TouchableOpacity
               style={[styles.actionBtn, styles.cancelBtn]}
@@ -211,23 +217,21 @@ export default function TodoForm({ visible, onClose, onSubmit }: Props) {
             </TouchableOpacity>
           </View>
         </View>
-
-        {/* Discard Changes Alert */}
         {showAlert && (
           <Animated.View style={[styles.alertContainer, { opacity: fadeAnim }]}>
             <Animated.View
               style={[styles.alertBox, { transform: [{ scale: scaleAnim }] }]}
             >
-              <Text style={styles.alertText}>Discard changes?</Text>
-
+              <Text style={styles.alertText}>Discard Changes?</Text>
               <View style={styles.alertButtons}>
                 <TouchableOpacity
                   style={styles.alertButton}
-                  onPress={() => setShowAlert(false)}
+                  onPress={() => {
+                    setShowAlert(false);
+                  }}
                 >
                   <Text style={styles.alertButtonText}>Keep Editing</Text>
                 </TouchableOpacity>
-
                 <TouchableOpacity
                   style={styles.alertButton}
                   onPress={confirmDiscard}
@@ -238,8 +242,6 @@ export default function TodoForm({ visible, onClose, onSubmit }: Props) {
             </Animated.View>
           </Animated.View>
         )}
-
-        {/* Fullscreen image preview */}
         {previewIndex !== null && (
           <Modal visible transparent animationType="fade">
             <View style={styles.previewOverlay}>

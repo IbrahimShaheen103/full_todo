@@ -13,6 +13,7 @@ import {
   View,
 } from "react-native";
 import TodoForm from "../components/AddForm/TodoForm";
+import EditForm from "../components/EditForm/EditForm";
 import styles from "./styles";
 
 type Todo = {
@@ -31,7 +32,9 @@ export default function Index() {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"all" | "done" | "active">("all");
   const [showForm, setShowForm] = useState(false);
+  const [showEditForm, setShowEditForm] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
+  const [selectedTodo, setSelectedTodo] = useState<Todo | null>(null);
 
   const [lastDeletedTodos, setLastDeletedTodos] = useState<Todo[] | null>(null);
   const [showUndo, setShowUndo] = useState(false);
@@ -60,6 +63,11 @@ export default function Index() {
       prev.map((t) => (t.id === id ? { ...t, done: !t.done } : t))
     );
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Soft);
+  };
+
+  const editTodo = (todo: Todo) => {
+    setSelectedTodo(todo);
+    setShowEditForm(true);
   };
 
   const deleteTodo = (id: string) => {
@@ -215,6 +223,10 @@ export default function Index() {
                 )}
               </View>
 
+              <TouchableOpacity onPress={() => editTodo(item)}>
+                <Text style={styles.delete}>✏️</Text>
+              </TouchableOpacity>
+
               <TouchableOpacity onPress={() => deleteTodo(item.id)}>
                 <Text style={styles.delete}>❌</Text>
               </TouchableOpacity>
@@ -306,6 +318,22 @@ export default function Index() {
             ]);
           }}
         />
+
+        {selectedTodo && (
+          <EditForm
+            visible={showEditForm}
+            data={selectedTodo}
+            onClose={() => setShowEditForm(false)}
+            onSubmit={(updatedTodo) => {
+              setTodos((prev) =>
+                prev.map((t) =>
+                  t.id === updatedTodo.id ? { ...t, ...updatedTodo } : t
+                )
+              );
+              setShowEditForm(false);
+            }}
+          />
+        )}
       </View>
     </KeyboardAvoidingView>
   );
