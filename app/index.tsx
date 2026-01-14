@@ -12,7 +12,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import TodoForm from "../components/TodoForm";
+import TodoForm from "../components/AddForm/TodoForm";
 import styles from "./styles";
 
 type Todo = {
