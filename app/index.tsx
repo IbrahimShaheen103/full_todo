@@ -224,7 +224,7 @@ export default function Index() {
               </View>
 
               <TouchableOpacity onPress={() => editTodo(item)}>
-                <Text style={styles.delete}>✏️</Text>
+                <Text style={[styles.delete, { marginRight: 10 }]}>✏️</Text>
               </TouchableOpacity>
 
               <TouchableOpacity onPress={() => deleteTodo(item.id)}>
