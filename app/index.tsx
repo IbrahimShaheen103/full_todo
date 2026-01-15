@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Haptics from "expo-haptics";
-import { useRouter } from "expo-router";
-import { useEffect, useRef, useState } from "react";
+import { useFocusEffect, useRouter } from "expo-router";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Animated,
   FlatList,
@@ -45,9 +45,11 @@ export default function Index() {
 
   const router = useRouter();
 
-  useEffect(() => {
-    loadTodos();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      loadTodos();
+    }, [])
+  );
 
   useEffect(() => {
     AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(todos));
@@ -197,11 +199,7 @@ export default function Index() {
                 router.push({
                   pathname: "/details",
                   params: {
-                    title: item.title,
-                    details: item.details,
-                    done: item.done.toString(),
-                    dueDate: item.dueDate || "",
-                    images: JSON.stringify(item.images),
+                    id: item.id,
                   },
                 })
               }
